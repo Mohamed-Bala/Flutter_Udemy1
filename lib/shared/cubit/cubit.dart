@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_udemy/modules/done_tasks/done_tasks_screen.dart';
 import 'package:flutter_udemy/modules/new_tasks/new_tasks_screen.dart';
 import 'package:flutter_udemy/shared/components/constants.dart';
 import 'package:flutter_udemy/shared/cubit/states.dart';
+import 'package:flutter_udemy/shared/network/local/cache_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
 class AppCubit extends Cubit<AppStates> {
@@ -27,7 +27,7 @@ class AppCubit extends Cubit<AppStates> {
     'Archived Tasks',
   ];
 
-  Void changeIndex(int index) {
+  void changeIndex(int index) {
     currentIndex = index;
     emit(AppChangeBottomNavBarState());
   }
@@ -115,12 +115,12 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-
   void deleteData({
     @required int id,
   }) async {
     database.rawDelete(
-      'DELETE FROM tasks WHERE id = ?',[id],
+      'DELETE FROM tasks WHERE id = ?',
+      [id],
     ).then((value) {
       getDataFormDatabase(database);
       emit(AppDeleteDatabaseState());
@@ -137,5 +137,22 @@ class AppCubit extends Cubit<AppStates> {
     isBottomSheetShow = isShow;
     fabIcon = icon;
     emit(AppChangeBottomSheetState());
+  }
+
+  bool isDark = false;
+
+  void changeAppMode({bool formShaerd}) {
+    if (formShaerd != null) {
+      isDark = formShaerd;
+      emit(AppChangeModeState());
+
+    }else {
+       isDark = !isDark;
+    CacheHelper.putData(key: 'isDark', value: isDark).then((value) {
+      emit(AppChangeModeState());
+    });
+
+    }
+   
   }
 }
